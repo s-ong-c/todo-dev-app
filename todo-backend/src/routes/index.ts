@@ -62,6 +62,21 @@ routes.post('/create', async ctx => {
   }
 });
 
+routes.get('/refer/:id', async ctx => {
+  type RequestBody = {
+    id: number;
+  };
+  const { id }: RequestBody = ctx.request.body;
+
+  try {
+    const { isCompleted } = await Todo.findOne(id);
+    ctx.status = 200;
+    ctx.body = { isCompleted };
+  } catch (e) {
+    ctx.throw(e);
+  }
+});
+
 routes.put('/toggle/:id', async ctx => {
   type RequestBody = {
     title?: string;
@@ -70,12 +85,13 @@ routes.put('/toggle/:id', async ctx => {
   };
   const { title, id, isCompleted }: RequestBody = ctx.request.body;
   if (isNaN(Number(ctx.params.id))) {
+    ctx.status = 400;
     return;
   }
 
   Todo.update(
     {
-      isCompleted: isCompleted,
+      isCompleted,
       title
     },
     {

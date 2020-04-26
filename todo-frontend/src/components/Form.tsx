@@ -21,14 +21,6 @@ const FormBlock = styled.div`
     border: 1px solid #dee2e6;
     min-width: 0;
   }
-  /* input {
-    outline: none;
-    border: none;
-    flex: 1;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border: 1px solid #dee2e6;
-  } */
   button {
     background: #20c997;
     color: white;

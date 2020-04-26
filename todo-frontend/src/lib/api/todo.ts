@@ -28,7 +28,7 @@ export interface Create {
 }
 export const getTodoList = async () => {
   const data = await apiClient.get<IItem>('/all');
-  return data;
+  return data.data;
 };
 export const crateTodo = async ({ todo }: { todo: Create }) =>
   await apiClient.post<Create>('/create', todo);
@@ -38,3 +38,8 @@ export const toggleTodo = async (id: number, isCompleted: boolean) =>
 
 export const deleteTodo = async (id: number) =>
   await apiClient.post(`/delete/${id}`);
+
+export const isRefCompleted = async (id: number) => {
+  const { data } = await apiClient.get(`/refer/${id}`);
+  return data.isCompleted;
+};

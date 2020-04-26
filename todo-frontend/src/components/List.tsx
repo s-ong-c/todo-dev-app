@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import Item from './Item';
-import { IItem } from '../lib/api/todo';
+import { IItem, Todo } from '../lib/api/todo';
 import Form from './Form';
 import { useInputValidate } from '../lib/hooks/useInputValidate';
 import useToggle from '../lib/hooks/useToggle';
 import RefSection from './RefSection';
 import RefMenu from './RefMenu';
 import Pagination from './Pagination';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../modules';
+import { TODO, todoSelectors } from '../modules/todo';
+import useInput from '../lib/hooks/useInput';
 
 const Block = styled.div`
   width: 512px;
@@ -126,7 +130,7 @@ interface ListProps {
   visible: boolean;
   todoItems: IItem;
   onVisible: () => void;
-  onToggle: (id: number, isCompleted: boolean) => void;
+  onToggle: (id: number, isCompleted: boolean, refId?: number) => void;
   onDelete: (id: number) => void;
   addTodoList: (todo: string, refNum: number) => void;
 }
@@ -137,16 +141,25 @@ const List: React.FC<ListProps> = ({
   onDelete,
   onToggle,
   addTodoList,
+  children,
 }) => {
   const [val, setVal, isError, isEmpty] = useInputValidate();
   const [userMenu, toggleUserMenu] = useToggle(false);
   const [refNum, serRefNum] = useState(0);
   const [page, setPage] = React.useState<number>(1);
+  const [value, onChange] = useInput('');
 
   const onChangeInput = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
     setVal(target.value);
   };
 
+  const items = useSelector<IRootState, Todo[]>(state =>
+    todoSelectors
+      .visibleItems(state[TODO])
+      .filter(x =>
+        value !== '' ? x.title === value || x.id === parseInt(value) : x,
+      ),
+  );
   const onSubmit = () => {
     if (isEmpty || isError) {
       return;
@@ -155,9 +168,11 @@ const List: React.FC<ListProps> = ({
     setVal('');
     serRefNum(0);
   };
+
   return (
     <Block>
       <div className="wrapper">
+        {children}
         <Form
           value={val}
           refNum={refNum}
@@ -174,6 +189,7 @@ const List: React.FC<ListProps> = ({
         </Form>
       </div>
       <div className="contents">
+        <input onChange={onChange} value={value} placeholder="TODO 검색" />
         <ListBlock>
           <header>
             <h3>Todo App</h3>
@@ -181,15 +197,15 @@ const List: React.FC<ListProps> = ({
               {!visible ? '숨기기' : '보여줘'}
             </button>
           </header>
-          {todoItems.todo && (
+          {items && (
             <Pagination
               setPage={setPage}
               page={page}
-              totalCount={todoItems.todo && todoItems.todo.length}
+              totalCount={items && items.length}
             />
           )}
-          {todoItems.todo &&
-            todoItems.todo
+          {items &&
+            items
               .slice((page - 1) * 5, page * 5)
               .map(todo => (
                 <Item
@@ -200,7 +216,13 @@ const List: React.FC<ListProps> = ({
                   updateAt={todo.updatedAt}
                   title={todo.title}
                   refId={todo.assoicates[0] && todo.assoicates[0].parentId}
-                  onToggle={() => onToggle(todo.id, todo.isCompleted)}
+                  onToggle={() =>
+                    onToggle(
+                      todo.id,
+                      todo.isCompleted,
+                      todo.assoicates[0] && todo.assoicates[0].parentId,
+                    )
+                  }
                   onDelete={() => onDelete(todo.id)}
                 />
               ))}

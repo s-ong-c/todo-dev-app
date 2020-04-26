@@ -21,6 +21,7 @@ const Text = styled.div<{ status: boolean }>`
   color: #495057;
   cursor: pointer;
   .ref {
+    margin-left: 1rem;
     color: red;
   }
   span {

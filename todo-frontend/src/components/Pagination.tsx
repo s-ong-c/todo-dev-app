@@ -60,7 +60,6 @@ const Pagination: React.FC<PaginationProps> = ({
   const Next = () => {
     setPage(page + 1);
   };
-  console.log(Math.ceil(totalCount / 5));
   return (
     <PaginationBlock>
       <div className="page-number">
